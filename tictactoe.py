@@ -2,12 +2,14 @@
 Tic Tac Toe Player
 """
 
+from collections import deque
 import math
 import copy
 
 X = "X"
 O = "O"
 EMPTY = None
+last_five_actions=deque()
 
 
 def initial_state():
@@ -23,17 +25,13 @@ def player(board):
     """
     Returns player who has the next turn on a board.
     """
-    totalX=0
-    totalO=0
+    totalX=totalO=0
     for i in range(len(board)):
         for j in range(len(board[0])):
             if board[i][j]==X:
                 totalX+=1
             if board[i][j]==O:
                 totalO+=1
-    
- 
-    
     if totalX>totalO:
         return O
     else:
@@ -64,11 +62,30 @@ def result(board, action):
     
     newBoard = copy.deepcopy(board)
     i,j=action
+
     curPlayer=player(board)
     newBoard[i][j]=curPlayer
     return newBoard
     # raise NotImplementedError
 
+def result2(board, action):
+    """
+    Returns the board that results from making move (i, j) on the board.
+    """
+    if action not in actions(board):
+        raise Exception('Not a valid action')
+    
+    newBoard = copy.deepcopy(board)
+    i,j=action
+    last_five_actions.append(action)
+    curPlayer=player(board)
+    newBoard[i][j]=curPlayer
+    
+    if len(last_five_actions)>5:
+        a,b=last_five_actions.popleft()
+        newBoard[a][b]=EMPTY
+    return newBoard
+    # raise NotImplementedError
 
 def winner(board):
     """
@@ -171,6 +188,7 @@ def minimax(board):
             if minValueResult > v:
                 v = minValueResult
                 bestAction = action
+
             if minValueResult==1:
                 break
         return v, bestAction
@@ -178,7 +196,7 @@ def minimax(board):
     def minValue(board):
         v = math.inf
         bestAction = None
-        if terminal(board):
+        if terminal(board): 
             return utility(board), None
         for action in actions(board):
             maxValueResult, _ = maxValue(result(board, action))
@@ -196,4 +214,5 @@ def minimax(board):
     else:
         _, optimal = minValue(board)
         return optimal
+    
 
